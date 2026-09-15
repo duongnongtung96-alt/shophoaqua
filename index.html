@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fruitica | Hoa quả tươi ngon</title>
+    <meta
+      name="description"
+      content="Fruitica - cửa hàng hoa quả tươi ngon, sạch, an toàn và giao hàng nhanh chóng."
+    />
+    <style>
+      :root {
+        --green-900: #0e4d2f;
+        --green-700: #1a7f47;
+        --green-500: #2fbf71;
+        --green-300: #dff9eb;
+        --orange-500: #ff9f43;
+        --orange-300: #ffe0b5;
+        --red-500: #ef5a5a;
+        --yellow-300: #ffe7a8;
+        --text: #1f2d1f;
+        --muted: #64746a;
+        --bg: #fffaf4;
+        --card: #ffffff;
+        --shadow: 0 15px 35px rgba(18, 60, 37, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--text);
+        background: linear-gradient(180deg, #fffaf5 0%, #f6fff5 100%);
+      }
+
+      img {
+        max-width: 100%;
+        display: block;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .container {
+        width: min(1160px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .topbar {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid rgba(15, 77, 47, 0.08);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 82px;
+        gap: 20px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 700;
+        font-size: 1.4rem;
+        color: var(--green-900);
+      }
+
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--green-500), var(--orange-500));
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 1.4rem;
+        box-shadow: var(--shadow);
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .nav-links a:hover {
+        color: var(--green-900);
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .icon-btn {
+        width: 42px;
+        height: 42px;
+        border: 1px solid rgba(17, 82, 50, 0.12);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: white;
+        font-size: 1.1rem;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: none;
+        border-radius: 999px;
+        padding: 15px 24px;
+        font-weight: 700;
+        font-size: 0.98rem;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--green-700), var(--green-500));
+        color: white;
+        box-shadow: 0 12px 25px rgba(38, 170, 92, 0.25);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: white;
+        color: var(--green-900);
+        border: 1px solid rgba(17, 82, 50, 0.12);
+      }
+
+      .hero {
+        padding: 58px 0 30px;
+      }
+
+      .hero-wrap {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        align-items: center;
+        gap: 42px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: rgba(47, 191, 113, 0.1);
+        color: var(--green-900);
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 22px 0 18px;
+        font-size: clamp(2.5rem, 4vw, 5rem);
+        line-height: 1.05;
+        letter-spacing: -0.06em;
+        color: var(--green-900);
+      }
+
+      .hero p {
+        margin: 0 0 28px;
+        font-size: 1.13rem;
+        line-height: 1.8;
+        color: var(--muted);
+        max-width: 590px;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 26px;
+      }
+
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 28px;
+      }
+
+      .stat {
+        min-width: 120px;
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 2rem;
+        color: var(--green-900);
+      }
+
+      .stat span {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .hero-visual {
+        position: relative;
+        min-height: 560px;
+      }
+
+      .visual-card {
+        position: absolute;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(17, 82, 50, 0.06);
+      }
+
+      .main-image {
+        width: min(80%, 470px);
+        height: 480px;
+        right: 18px;
+        top: 32px;
+      }
+
+      .main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .badge {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 18px;
+        padding: 14px 16px;
+        box-shadow: 0 10px 20px rgba(24, 78, 47, 0.08);
+      }
+
+      .badge-top {
+        left: 0;
+        top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .badge-top .mini-emoji {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, var(--yellow-300), var(--orange-300));
+        font-size: 1.4rem;
+      }
+
+      .badge-top strong {
+        display: block;
+        font-size: 1.1rem;
+        color: var(--green-900);
+      }
+
+      .badge-top span,
+      .badge-bottom span {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      .badge-bottom {
+        right: 8px;
+        bottom: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 150px;
+      }
+
+      .badge-bottom strong {
+        font-size: 1.3rem;
+        color: var(--green-900);
+      }
+
+      .section {
+        padding: 90px 0;
+      }
+
+      .section-heading {
+        margin-bottom: 34px;
+      }
+
+      .section-heading small {
+        color: var(--green-700);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .section-heading h2 {
+        margin: 12px 0 0;
+        font-size: clamp(2rem, 3vw, 3rem);
+        color: var(--green-900);
+        letter-spacing: -0.05em;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+      }
+
+      .feature-card {
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(17, 82, 50, 0.08);
+        border-radius: 24px;
+        padding: 28px 22px;
+        box-shadow: 0 10px 25px rgba(15, 60, 37, 0.04);
+      }
+
+      .feature-icon {
+        width: 62px;
+        height: 62px;
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, var(--green-300), #edfef3);
+        font-size: 1.7rem;
+        margin-bottom: 18px;
+      }
+
+      .feature-card h3 {
+        margin: 0 0 10px;
+        font-size: 1.2rem;
+        color: var(--green-900);
+      }
+
+      .feature-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .products {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+      }
+
+      .product-card {
+        background: white;
+        border-radius: 26px;
+        overflow: hidden;
+        box-shadow: 0 18px 35px rgba(17, 82, 50, 0.08);
+        border: 1px solid rgba(17, 82, 50, 0.06);
+      }
+
+      .product-image {
+        height: 240px;
+        overflow: hidden;
+      }
+
+      .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .product-body {
+        padding: 20px 18px 22px;
+      }
+
+      .product-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .tag {
+        display: inline-flex;
+        padding: 8px 10px;
+        border-radius: 999px;
+        background: rgba(47, 191, 113, 0.1);
+        color: var(--green-700);
+        font-weight: 700;
+        font-size: 0.74rem;
+      }
+
+      .rating {
+        color: #f7b731;
+        font-weight: 700;
+      }
+
+      .product-card h3 {
+        margin: 0 0 8px;
+        font-size: 1.3rem;
+        color: var(--green-900);
+      }
+
+      .product-card p {
+        margin: 0 0 16px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .product-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .price {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--green-900);
+      }
+
+      .mini-btn {
+        background: var(--green-300);
+        color: var(--green-900);
+        border: none;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .offer {
+        padding: 24px;
+        background: linear-gradient(135deg, #183f2b, #235c3d 58%, #2e8b57);
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        color: white;
+        box-shadow: 0 20px 40px rgba(21, 86, 52, 0.24);
+      }
+
+      .offer h3 {
+        font-size: clamp(2rem, 3vw, 3rem);
+        margin: 0 0 10px;
+        letter-spacing: -0.05em;
+      }
+
+      .offer p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1.02rem;
+      }
+
+      .offer-box {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .offer-badge {
+        width: 88px;
+        height: 88px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.18);
+        display: grid;
+        place-items: center;
+        font-size: 2.2rem;
+      }
+
+      .testimonials {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+
+      .testimonial {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(17, 82, 50, 0.08);
+        border-radius: 22px;
+        padding: 26px 22px;
+      }
+
+      .stars {
+        color: #f7b731;
+        letter-spacing: 2px;
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+      }
+
+      .testimonial p {
+        margin: 0 0 22px;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .person {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ffcf8d, #7ed39a);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        color: var(--green-900);
+      }
+
+      .person strong {
+        display: block;
+        color: var(--green-900);
+      }
+
+      .person span {
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      footer {
+        background: #0d2f1d;
+        color: rgba(255, 255, 255, 0.82);
+        padding: 32px 0 40px;
+      }
+
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr 0.8fr 1fr;
+        gap: 24px;
+      }
+
+      .footer-brand {
+        font-size: 2rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 10px;
+      }
+
+      .footer-grid p,
+      .footer-grid li,
+      .footer-grid a {
+        color: rgba(255, 255, 255, 0.76);
+        line-height: 1.9;
+      }
+
+      .footer-grid ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .footer-grid h4 {
+        margin: 0 0 12px;
+        color: white;
+        font-size: 1.05rem;
+      }
+
+      .copy {
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        margin-top: 30px;
+        padding-top: 20px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.65);
+      }
+
+      @media (max-width: 980px) {
+        .hero-wrap,
+        .features,
+        .products,
+        .testimonials,
+        .footer-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .hero-wrap {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-visual {
+          min-height: 440px;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .nav-links {
+          display: none;
+        }
+
+        .features,
+        .products,
+        .testimonials,
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .offer {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .stats {
+          gap: 18px;
+        }
+
+        .hero {
+          padding-top: 32px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container nav">
+        <a href="#" class="brand" aria-label="Fruitica home">
+          <span class="brand-mark">🍋</span>
+          <span>Fruitica</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="#home">Trang chủ</a>
+          <a href="#about">Về chúng tôi</a>
+          <a href="#products">Sản phẩm</a>
+          <a href="#reviews">Đánh giá</a>
+          <a href="#contact">Liên hệ</a>
+        </nav>
+
+        <div class="nav-actions">
+          <span class="icon-btn" aria-label="Giỏ hàng">🛒</span>
+          <button class="btn btn-primary">Đặt hàng</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="home">
+        <div class="container hero-wrap">
+          <div>
+            <span class="eyebrow">Tươi ngon mỗi ngày</span>
+            <h1>Hoa quả sạch cho một cuộc sống khỏe mạnh</h1>
+            <p>
+              Fruitica mang đến những loại trái cây tươi ngon, được lựa chọn kỹ lưỡng,
+              an toàn vệ sinh và giao hàng nhanh chóng đến tận nhà bạn.
+            </p>
+
+            <div class="hero-actions">
+              <button class="btn btn-primary">Mua ngay</button>
+              <button class="btn btn-secondary">Xem thực đơn</button>
+            </div>
+
+            <div class="stats">
+              <div class="stat">
+                <strong>2.4K+</strong>
+                <span>Khách hàng</span>
+              </div>
+              <div class="stat">
+                <strong>15+</strong>
+                <span>Loại trái cây</span>
+              </div>
+              <div class="stat">
+                <strong>4.9/5</strong>
+                <span>Đánh giá</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual" aria-label="Hình ảnh trái cây">
+            <div class="badge badge-top">
+              <div class="mini-emoji">🥭</div>
+              <div>
+                <strong>Cam sành</strong>
+                <span>Rang có vị ngọt</span>
+              </div>
+            </div>
+
+            <div class="visual-card main-image">
+              <img
+                src="https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=900&q=80"
+                alt="Bó trái cây tươi"
+              />
+            </div>
+
+            <div class="badge badge-bottom">
+              <span>Miễn phí giao hàng</span>
+              <strong>Đơn từ 299K</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="about">
+        <div class="container">
+          <div class="section-heading">
+            <small>Vì sao chọn Fruitica</small>
+            <h2>Chất lượng từ nguồn gốc đến tay khách hàng</h2>
+          </div>
+
+          <div class="features">
+            <article class="feature-card">
+              <div class="feature-icon">🌿</div>
+              <h3>100% tự nhiên</h3>
+              <p>Hoa quả được trồng theo tiêu chuẩn an toàn, không hóa chất độc hại.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="feature-icon">🚚</div>
+              <h3>Giao hàng nhanh</h3>
+              <p>Đặt hàng trong 30 phút, giao đến nơi đúng tiến độ và đúng chất lượng.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="feature-icon">✅</div>
+              <h3>Kiểm định chất lượng</h3>
+              <p>Mỗi sản phẩm đều có quy trình kiểm tra rõ ràng trước khi xuất kho.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="feature-icon">💚</div>
+              <h3>Hỗ trợ sức khỏe</h3>
+              <p>Giúp bạn bổ sung vitamin, khoáng chất và năng lượng cho cả gia đình.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="products">
+        <div class="container">
+          <div class="section-heading">
+            <small>Sản phẩm nổi bật</small>
+            <h2>Thực đơn hoa quả được yêu thích nhất</h2>
+          </div>
+
+          <div class="products">
+            <article class="product-card">
+              <div class="product-image">
+                <img src="https://images.unsplash.com/photo-1557800636-894a64c1696f?auto=format&fit=crop&w=700&q=80" alt="Mango" />
+              </div>
+              <div class="product-body">
+                <div class="product-top">
+                  <span class="tag">Hot</span>
+                  <span class="rating">★ 4.9</span>
+                </div>
+                <h3>Xoài cát</h3>
+                <p>Ngọt, mềm, thơm và giàu vitamin C cho sức khỏe mỗi ngày.</p>
+                <div class="product-footer">
+                  <span class="price">79.000đ</span>
+                  <button class="mini-btn">+ Thêm</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="product-card">
+              <div class="product-image">
+                <img src="https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=700&q=80" alt="Orange" />
+              </div>
+              <div class="product-body">
+                <div class="product-top">
+                  <span class="tag">New</span>
+                  <span class="rating">★ 4.8</span>
+                </div>
+                <h3>Cam sành</h3>
+                <p>Vị chua ngọt cân đối, giúp tăng cường đề kháng và hương thơm.</p>
+                <div class="product-footer">
+                  <span class="price">65.000đ</span>
+                  <button class="mini-btn">+ Thêm</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="product-card">
+              <div class="product-image">
+                <img src="https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=700&q=80" alt="Watermelon" />
+              </div>
+              <div class="product-body">
+                <div class="product-top">
+                  <span class="tag">Best</span>
+                  <span class="rating">★ 5.0</span>
+                </div>
+                <h3>Dưa hấu</h3>
+                <p>Giải nhiệt tuyệt vời, nhiều nước và rất phù hợp cho mùa hè.</p>
+                <div class="product-footer">
+                  <span class="price">99.000đ</span>
+                  <button class="mini-btn">+ Thêm</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="product-card">
+              <div class="product-image">
+                <img src="https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=700&q=80" alt="Grape" />
+              </div>
+              <div class="product-body">
+                <div class="product-top">
+                  <span class="tag">Fresh</span>
+                  <span class="rating">★ 4.9</span>
+                </div>
+                <h3>Nho xanh</h3>
+                <p>Chín mọng, ngọt thanh và giàu dưỡng chất, lý tưởng cho bữa sáng.</p>
+                <div class="product-footer">
+                  <span class="price">120.000đ</span>
+                  <button class="mini-btn">+ Thêm</button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="offer">
+            <div class="offer-box">
+              <div class="offer-badge">🎉</div>
+              <div>
+                <h3>Ưu đãi đặc biệt</h3>
+                <p>Giảm 20% cho đơn hàng từ 500K trong tuần này.</p>
+              </div>
+            </div>
+            <button class="btn btn-secondary">Nhận ưu đãi</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="reviews">
+        <div class="container">
+          <div class="section-heading">
+            <small>Khách hàng nói gì</small>
+            <h2>Trải nghiệm tuyệt vời từ người mua</h2>
+          </div>
+
+          <div class="testimonials">
+            <article class="testimonial">
+              <div class="stars">★★★★★</div>
+              <p>
+                “Trái cây rất tươi, đóng gói cẩn thận và giao đúng hẹn. Tôi đã đặt hàng lặp lại 3 lần rồi.”
+              </p>
+              <div class="person">
+                <div class="avatar">A</div>
+                <div>
+                  <strong>Anh Nam</strong>
+                  <span>Khách hàng hà nội</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="testimonial">
+              <div class="stars">★★★★★</div>
+              <p>
+                “Chất lượng rất tốt, hương vị ngọt, quả to, giá hợp lý. Rất đáng để mua cho cả nhà.”
+              </p>
+              <div class="person">
+                <div class="avatar">L</div>
+                <div>
+                  <strong>Lan Anh</strong>
+                  <span>Khách hàng đà nẵng</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="testimonial">
+              <div class="stars">★★★★★</div>
+              <p>
+                “Dịch vụ giao hàng nhanh, nhân viên tư vấn nhiệt tình. Tôi cảm thấy rất hài lòng.”
+              </p>
+              <div class="person">
+                <div class="avatar">T</div>
+                <div>
+                  <strong>Tuấn Minh</strong>
+                  <span>Khách hàng hcm</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer id="contact">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <div class="footer-brand">Fruitica</div>
+            <p>
+              Cung cấp trái cây sạch, tưới dinh dưỡng và giao hàng tận nơi với dịch vụ chuyên nghiệp.
+            </p>
+          </div>
+
+          <div>
+            <h4>Menu</h4>
+            <ul>
+              <li><a href="#home">Trang chủ</a></li>
+              <li><a href="#about">Về chúng tôi</a></li>
+              <li><a href="#products">Sản phẩm</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4>Hỗ trợ</h4>
+            <ul>
+              <li><a href="#">Chính sách</a></li>
+              <li><a href="#">Vận chuyển</a></li>
+              <li><a href="#">Câu hỏi thường gặp</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4>Liên hệ</h4>
+            <ul>
+              <li>📍 123 Nguyễn Văn Linh, Đà Nẵng</li>
+              <li>📞 0901 234 567</li>
+              <li>✉️ hello@fruitica.vn</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="copy">© 2026 Fruitica. Mọi quyền được bảo lưu.</div>
+      </div>
+    </footer>
+  </body>
+</html>
