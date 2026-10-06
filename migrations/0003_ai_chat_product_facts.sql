@@ -1,0 +1,4 @@
+ALTER TABLE products ADD COLUMN stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0);
+ALTER TABLE products ADD COLUMN unit TEXT NOT NULL DEFAULT 'kg';
+ALTER TABLE products ADD COLUMN origin TEXT;
+ALTER TABLE products ADD COLUMN specifications TEXT;

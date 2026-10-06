@@ -14,8 +14,8 @@
   --muted: #66786d;
   --paper: #fffaf5;
   --line: #e6e9df;
-  --display: Georgia, "Times New Roman", serif;
-  --body: "Avenir Next", "Segoe UI", sans-serif;
+  --display: "Lora", Georgia, "Times New Roman", serif;
+  --body: "Be Vietnam Pro", "Segoe UI", sans-serif;
 }
 
 * {
@@ -249,7 +249,7 @@ img {
   margin: 20px 0 18px;
   font-size: 62px;
   font-weight: 500;
-  line-height: 1.03;
+  line-height: 1.15;
 }
 
 .hero h1 em {
@@ -390,7 +390,7 @@ img {
   margin: 11px 0 0;
   font-size: 40px;
   font-weight: 500;
-  line-height: 1.13;
+  line-height: 1.2;
 }
 
 .heading-row {
@@ -1337,6 +1337,7 @@ img {
 
   .hero h1 {
     font-size: 44px;
+    line-height: 1.16;
   }
 
   .hero-copy > p {
@@ -1388,6 +1389,7 @@ img {
 
   .section-heading h2 {
     font-size: 34px;
+    line-height: 1.2;
   }
 
   .heading-row {

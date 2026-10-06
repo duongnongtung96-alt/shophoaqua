@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import FruiticaChat from './components/fruitica-chat'
 import { AUTH_STORAGE_KEY, AuthSession } from './lib/auth'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://shophoaqua.duongnongtung96.workers.dev'
@@ -93,6 +94,7 @@ export default function HomePage() {
       </main>
 
       <footer className="site-footer" id="contact"><div className="container footer-content"><div><Link href="/" className="brand footer-brand"><span className="brand-mark">F</span><span>Fruitica</span></Link><p>Hoa quả sạch cho những ngày thật lành.</p></div><div><strong>Ghé thăm</strong><a href="#products">Sản phẩm</a><a href="#about">Câu chuyện Fruitica</a></div><div><strong>Liên hệ</strong><a href="mailto:hello@fruitica.vn">hello@fruitica.vn</a><span>Thứ 2 – Chủ nhật · 8:00–20:00</span></div></div><div className="container footer-bottom">© 2026 Fruitica. Tươi ngon mỗi ngày.</div></footer>
+      <FruiticaChat />
     </>
   )
 }

@@ -34,6 +34,14 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('application/json')) {
+        if (response.status === 404) {
+          throw new Error('API đăng nhập chưa được cập nhật trên Cloudflare Worker. Hãy deploy Worker rồi thử lại.')
+        }
+        throw new Error(`API trả về phản hồi không hợp lệ (HTTP ${response.status}). Hãy kiểm tra trạng thái Cloudflare Worker.`)
+      }
+
       const result = await response.json() as { success: boolean; data?: AuthSession; error?: string }
       if (!response.ok || !result.success || !result.data) throw new Error(result.error || 'Không thể đăng nhập lúc này.')
 

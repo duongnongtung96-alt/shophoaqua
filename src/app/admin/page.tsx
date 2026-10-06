@@ -14,6 +14,8 @@ interface Product {
   tag: string | null
   description: string | null
   image_key: string
+  stock: number
+  unit: string
 }
 
 export default function AdminPage() {
@@ -23,8 +25,12 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
+  const [stock, setStock] = useState('0')
+  const [unit, setUnit] = useState('kg')
   const [tag, setTag] = useState('Hot')
   const [description, setDescription] = useState('')
+  const [origin, setOrigin] = useState('')
+  const [specifications, setSpecifications] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState('')
   const [loading, setLoading] = useState(false)
@@ -80,8 +86,12 @@ export default function AdminPage() {
     const form = new FormData()
     form.set('name', name)
     form.set('price', price)
+    form.set('stock', stock)
+    form.set('unit', unit)
     form.set('tag', tag)
     form.set('description', description)
+    form.set('origin', origin)
+    form.set('specifications', specifications)
     form.set('image', image)
 
     try {
@@ -95,8 +105,12 @@ export default function AdminPage() {
 
       setName('')
       setPrice('')
+      setStock('0')
+      setUnit('kg')
       setTag('Hot')
       setDescription('')
+      setOrigin('')
+      setSpecifications('')
       setImage(null)
       setPreview('')
       formElement.reset()
@@ -106,6 +120,23 @@ export default function AdminPage() {
       setMessage(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng sản phẩm.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function updateStock(product: Product, nextStock: number) {
+    if (!session || !Number.isSafeInteger(nextStock) || nextStock < 0) return
+    try {
+      const response = await fetch(`${API_URL}/api/products/${product.id}/stock`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${session.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stock: nextStock }),
+      })
+      const result = await response.json() as { success: boolean; error?: string }
+      if (!response.ok || !result.success) throw new Error(result.error || 'Không thể cập nhật tồn kho.')
+      setProducts((current) => current.map((item) => item.id === product.id ? { ...item, stock: nextStock } : item))
+      setMessage(`Đã cập nhật tồn kho ${product.name}.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Không thể cập nhật tồn kho.')
     }
   }
 
@@ -152,14 +183,17 @@ export default function AdminPage() {
             <form className="product-form" onSubmit={addProduct}>
               <label>Tên hoa quả<input value={name} onChange={(event) => setName(event.target.value)} required maxLength={120} placeholder="Ví dụ: Xoài cát Hòa Lộc" /></label>
               <div className="form-row"><label>Giá bán (VNĐ)<input type="number" min="1" step="1000" value={price} onChange={(event) => setPrice(event.target.value)} required placeholder="79.000" /></label><label>Nhãn<select value={tag} onChange={(event) => setTag(event.target.value)}><option>Hot</option><option>New</option><option>Best</option><option>Fresh</option></select></label></div>
+              <div className="form-row"><label>Tồn kho<input type="number" min="0" step="1" value={stock} onChange={(event) => setStock(event.target.value)} required /></label><label>Đơn vị bán<input value={unit} onChange={(event) => setUnit(event.target.value)} maxLength={20} required placeholder="kg, hộp, quả..." /></label></div>
+              <label>Xuất xứ<input value={origin} onChange={(event) => setOrigin(event.target.value)} maxLength={120} placeholder="Ví dụ: Cao Lãnh, Đồng Tháp" /></label>
               <label>Mô tả<textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={4} maxLength={500} placeholder="Hương vị, nguồn gốc và cách thưởng thức..." /></label>
+              <label>Thông số / đặc điểm<textarea value={specifications} onChange={(event) => setSpecifications(event.target.value)} rows={3} maxLength={1200} placeholder="Ví dụ: vị ngọt đậm; độ chín vừa; bảo quản mát..." /></label>
               <label className="upload-label">Ảnh sản phẩm <span>JPG, PNG hoặc WebP · tối đa 5 MB</span><input type="file" accept="image/jpeg,image/png,image/webp" required onChange={(event) => { const selected = event.target.files?.[0] ?? null; setImage(selected); setPreview(selected ? URL.createObjectURL(selected) : '') }} />{preview ? <img className="upload-preview" src={preview} alt="Xem trước ảnh sản phẩm" /> : <span className="upload-drop"><strong>＋</strong><span>Chọn ảnh từ thiết bị</span></span>}</label>
               {message && <p className={`form-message ${message.startsWith('Sản phẩm') ? 'success' : ''}`} role="status">{message}</p>}
               <button className="button button-green submit-product" type="submit" disabled={loading}>{loading ? 'Đang đăng sản phẩm...' : 'Đăng sản phẩm'} <span aria-hidden="true">↗</span></button>
             </form>
           </section>
           <section className="inventory-panel"><div className="inventory-heading"><div><span className="kicker">Danh mục</span><h2>Đang bán <span>{products.length}</span></h2></div><span className="inventory-dot">Đang cập nhật</span></div>
-            {products.length ? <div className="inventory-list">{products.map((product) => <article className="inventory-item" key={product.id}><img src={`${API_URL}/api/images/${encodeURIComponent(product.image_key)}`} alt="" /><div><span className="inventory-tag">{product.tag || 'Fresh'}</span><strong>{product.name}</strong><small>{product.price.toLocaleString('vi-VN')} đ</small></div></article>)}</div> : <p className="inventory-empty">Chưa có sản phẩm trong danh mục.</p>}
+            {products.length ? <div className="inventory-list">{products.map((product) => <article className="inventory-item" key={product.id}><img src={`${API_URL}/api/images/${encodeURIComponent(product.image_key)}`} alt="" /><div><span className="inventory-tag">{product.tag || 'Fresh'}</span><strong>{product.name}</strong><small>{product.price.toLocaleString('vi-VN')} đ · {product.stock} {product.unit} còn</small><form className="stock-edit" onSubmit={(event) => { event.preventDefault(); const value = Number(new FormData(event.currentTarget).get('stock')); void updateStock(product, value) }}><input aria-label={`Tồn kho ${product.name}`} name="stock" type="number" min="0" step="1" defaultValue={product.stock} /><button type="submit">Lưu tồn</button></form></div></article>)}</div> : <p className="inventory-empty">Chưa có sản phẩm trong danh mục.</p>}
           </section>
         </div>}
       </div>

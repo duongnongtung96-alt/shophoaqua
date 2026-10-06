@@ -14,5 +14,8 @@
       "binding": "BUCKET",
       "bucket_name": "shophoaqua-bucket"
     }
-  ]
+  ],
+  "ai": {
+    "binding": "AI"
+  }
 }
