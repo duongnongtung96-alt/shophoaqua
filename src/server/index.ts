@@ -225,7 +225,7 @@ app.post('/api/auth/change-password', async (c) => {
 
 app.get('/api/products', async (c) => {
   try {
-    const { results } = await c.env.DB.prepare('SELECT * FROM products ORDER BY created_at DESC, id DESC').all()
+    const { results } = await c.env.DB.prepare('SELECT * FROM products WHERE is_active = 1 ORDER BY created_at DESC, id DESC').all()
     return c.json({ success: true, data: results })
   } catch (error) {
     return c.json({ success: false, error: error instanceof Error ? error.message : 'Không thể tải sản phẩm.' }, 500)
@@ -256,7 +256,7 @@ app.post('/api/chat', async (c) => {
 
   try {
     const { results } = await c.env.DB.prepare(
-      'SELECT name, price, tag, rating, description, stock, unit, origin, specifications FROM products ORDER BY name LIMIT 60'
+      'SELECT name, price, tag, rating, description, stock, unit, origin, specifications FROM products WHERE is_active = 1 ORDER BY name LIMIT 60'
     ).all<ChatProduct>()
 
     const history = (body?.history ?? [])
@@ -319,9 +319,195 @@ app.patch('/api/products/:id/stock', async (c) => {
     return c.json({ success: false, error: 'Mã sản phẩm hoặc số lượng tồn kho không hợp lệ.' }, 400)
   }
 
-  const result = await c.env.DB.prepare('UPDATE products SET stock = ? WHERE id = ?').bind(stock, productId).run()
+  const result = await c.env.DB.prepare('UPDATE products SET stock = ? WHERE id = ? AND is_active = 1').bind(stock, productId).run()
   if (!result.meta.changes) return c.json({ success: false, error: 'Không tìm thấy sản phẩm.' }, 404)
   return c.json({ success: true, data: { id: productId, stock } })
+})
+
+app.get('/api/admin/products', async (c) => {
+  const identity = await requireAdmin(c.req.raw, c.env)
+  if (!identity) return c.json({ success: false, error: 'Bạn cần đăng nhập bằng tài khoản quản trị.' }, 401)
+  const { results } = await c.env.DB.prepare('SELECT * FROM products ORDER BY is_active DESC, created_at DESC, id DESC').all()
+  return c.json({ success: true, data: results })
+})
+
+app.put('/api/products/:id', async (c) => {
+  const identity = await requireAdmin(c.req.raw, c.env)
+  if (!identity) return c.json({ success: false, error: 'Bạn cần đăng nhập bằng tài khoản quản trị.' }, 401)
+
+  const productId = Number(c.req.param('id'))
+  if (!Number.isSafeInteger(productId) || productId <= 0) return c.json({ success: false, error: 'Mã sản phẩm không hợp lệ.' }, 400)
+  const existing = await c.env.DB.prepare('SELECT image_key FROM products WHERE id = ? AND is_active = 1').bind(productId).first<{ image_key: string }>()
+  if (!existing) return c.json({ success: false, error: 'Không tìm thấy sản phẩm.' }, 404)
+
+  const form = await c.req.parseBody()
+  const name = typeof form.name === 'string' ? form.name.trim() : ''
+  const price = Number(form.price)
+  const stock = Number(form.stock)
+  const unit = typeof form.unit === 'string' ? form.unit.trim() : ''
+  const tag = typeof form.tag === 'string' ? form.tag.trim() : ''
+  const description = typeof form.description === 'string' ? form.description.trim() : ''
+  const origin = typeof form.origin === 'string' ? form.origin.trim() : ''
+  const specifications = typeof form.specifications === 'string' ? form.specifications.trim() : ''
+  const image = form.image instanceof File && form.image.size > 0 ? form.image : null
+
+  if (!name || name.length > 120 || !Number.isSafeInteger(price) || price <= 0 || !Number.isSafeInteger(stock) || stock < 0 || !unit || unit.length > 20) {
+    return c.json({ success: false, error: 'Vui lòng nhập tên, giá, tồn kho và đơn vị hợp lệ.' }, 400)
+  }
+  if (description.length > 500 || origin.length > 120 || specifications.length > 1200) {
+    return c.json({ success: false, error: 'Mô tả, xuất xứ hoặc thông số vượt quá độ dài cho phép.' }, 400)
+  }
+  if (tag && !allowedTags.has(tag)) return c.json({ success: false, error: 'Nhãn sản phẩm không hợp lệ.' }, 400)
+  if (image && !['image/jpeg', 'image/png', 'image/webp'].includes(image.type)) {
+    return c.json({ success: false, error: 'Ảnh chỉ hỗ trợ định dạng JPG, PNG hoặc WebP.' }, 400)
+  }
+  if (image && image.size > 5 * 1024 * 1024) return c.json({ success: false, error: 'Ảnh không được vượt quá 5 MB.' }, 400)
+
+  let imageKey = existing.image_key
+  if (image) {
+    const extension = image.type === 'image/jpeg' ? 'jpg' : image.type === 'image/png' ? 'png' : 'webp'
+    imageKey = `${crypto.randomUUID()}.${extension}`
+    await c.env.BUCKET.put(imageKey, await image.arrayBuffer(), { httpMetadata: { contentType: image.type } })
+  }
+
+  try {
+    await c.env.DB.prepare(
+      'UPDATE products SET name = ?, price = ?, stock = ?, unit = ?, tag = ?, description = ?, origin = ?, specifications = ?, image_key = ? WHERE id = ? AND is_active = 1'
+    ).bind(name, price, stock, unit, tag || null, description || null, origin || null, specifications || null, imageKey, productId).run()
+  } catch (error) {
+    if (image) await c.env.BUCKET.delete(imageKey)
+    return c.json({ success: false, error: error instanceof Error ? error.message : 'Không thể cập nhật sản phẩm.' }, 500)
+  }
+  if (image) await c.env.BUCKET.delete(existing.image_key).catch(() => undefined)
+  return c.json({ success: true, data: { id: productId, name, price, stock, unit, tag, description, origin, specifications, image_key: imageKey } })
+})
+
+app.delete('/api/products/:id', async (c) => {
+  const identity = await requireAdmin(c.req.raw, c.env)
+  if (!identity) return c.json({ success: false, error: 'Bạn cần đăng nhập bằng tài khoản quản trị.' }, 401)
+  const productId = Number(c.req.param('id'))
+  if (!Number.isSafeInteger(productId) || productId <= 0) return c.json({ success: false, error: 'Mã sản phẩm không hợp lệ.' }, 400)
+  const result = await c.env.DB.prepare('UPDATE products SET is_active = 0 WHERE id = ? AND is_active = 1').bind(productId).run()
+  if (!result.meta.changes) return c.json({ success: false, error: 'Không tìm thấy sản phẩm đang bán.' }, 404)
+  return c.json({ success: true, data: { id: productId, is_active: false } })
+})
+
+app.patch('/api/products/:id/visibility', async (c) => {
+  const identity = await requireAdmin(c.req.raw, c.env)
+  if (!identity) return c.json({ success: false, error: 'Bạn cần đăng nhập bằng tài khoản quản trị.' }, 401)
+  const productId = Number(c.req.param('id'))
+  const body = await c.req.json<{ is_active?: boolean }>().catch(() => null)
+  if (!Number.isSafeInteger(productId) || productId <= 0 || typeof body?.is_active !== 'boolean') {
+    return c.json({ success: false, error: 'Sản phẩm hoặc trạng thái không hợp lệ.' }, 400)
+  }
+  const result = await c.env.DB.prepare('UPDATE products SET is_active = ? WHERE id = ?').bind(body.is_active ? 1 : 0, productId).run()
+  if (!result.meta.changes) return c.json({ success: false, error: 'Không tìm thấy sản phẩm.' }, 404)
+  return c.json({ success: true, data: { id: productId, is_active: body.is_active } })
+})
+
+app.post('/api/orders', async (c) => {
+  const body = await c.req.json<{
+    customer_name?: string
+    phone?: string
+    delivery_address?: string
+    note?: string
+    items?: Array<{ product_id?: number; quantity?: number }>
+  }>().catch(() => null)
+
+  const customerName = body?.customer_name?.trim() ?? ''
+  const phone = body?.phone?.trim() ?? ''
+  const address = body?.delivery_address?.trim() ?? ''
+  const note = body?.note?.trim() ?? ''
+  const items = body?.items
+  if (!customerName || customerName.length > 100 || !/^[+\d()\s.-]{8,24}$/.test(phone) || !address || address.length > 300 || note.length > 500) {
+    return c.json({ success: false, error: 'Vui lòng kiểm tra tên, số điện thoại và địa chỉ giao hàng.' }, 400)
+  }
+  if (!Array.isArray(items) || items.length === 0 || items.length > 20) {
+    return c.json({ success: false, error: 'Giỏ hàng không hợp lệ.' }, 400)
+  }
+
+  const seen = new Set<number>()
+  const orderLines: Array<{ id: number; name: string; price: number; quantity: number }> = []
+  for (const item of items) {
+    const productId = item.product_id
+    const quantity = item.quantity
+    if (!Number.isSafeInteger(productId) || (productId ?? 0) <= 0 || !Number.isSafeInteger(quantity) || (quantity ?? 0) < 1 || (quantity ?? 100) > 99 || seen.has(productId!)) {
+      return c.json({ success: false, error: 'Sản phẩm hoặc số lượng trong giỏ không hợp lệ.' }, 400)
+    }
+    seen.add(productId!)
+    const product = await c.env.DB.prepare(
+      'SELECT id, name, price, stock FROM products WHERE id = ? AND is_active = 1'
+    ).bind(productId).first<{ id: number; name: string; price: number; stock: number }>()
+    if (!product) return c.json({ success: false, error: 'Một sản phẩm trong giỏ không còn được bán.' }, 409)
+    if (product.stock < quantity!) return c.json({ success: false, error: `Số lượng ${product.name} còn lại không đủ.` }, 409)
+    orderLines.push({ ...product, quantity: quantity! })
+  }
+
+  const total = orderLines.reduce((sum, line) => sum + line.price * line.quantity, 0)
+  if (!Number.isSafeInteger(total)) return c.json({ success: false, error: 'Tổng đơn hàng vượt quá giới hạn.' }, 400)
+  const orderId = crypto.randomUUID()
+  const statements: D1PreparedStatement[] = [c.env.DB.prepare(
+    'INSERT INTO orders (id, customer_name, phone, delivery_address, note, total) VALUES (?, ?, ?, ?, ?, ?)'
+  ).bind(orderId, customerName, phone, address, note || null, total)]
+  for (const line of orderLines) {
+    statements.push(c.env.DB.prepare(
+      'UPDATE products SET stock = CASE WHEN is_active = 1 AND stock >= ? THEN stock - ? ELSE -1 END WHERE id = ?'
+    ).bind(line.quantity, line.quantity, line.id))
+    statements.push(c.env.DB.prepare(
+      'INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price) VALUES (?, ?, ?, ?, ?)'
+    ).bind(orderId, line.id, line.name, line.quantity, line.price))
+  }
+
+  try {
+    await c.env.DB.batch(statements)
+    return c.json({ success: true, data: { id: orderId, total, status: 'pending' } }, 201)
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : ''
+    if (detail.includes('stock >= 0') || detail.includes('CHECK constraint failed')) {
+      return c.json({ success: false, error: 'Tồn kho vừa thay đổi hoặc sản phẩm đã ngừng bán. Hãy cập nhật giỏ hàng và thử lại.' }, 409)
+    }
+    if (detail.includes('FOREIGN KEY constraint failed')) return c.json({ success: false, error: 'Một sản phẩm trong giỏ không còn tồn tại.' }, 409)
+    return c.json({ success: false, error: 'Không thể tạo đơn hàng lúc này.' }, 500)
+  }
+})
+
+app.get('/api/admin/orders', async (c) => {
+  const identity = await requireAdmin(c.req.raw, c.env)
+  if (!identity) return c.json({ success: false, error: 'Bạn cần đăng nhập bằng tài khoản quản trị.' }, 401)
+  const { results } = await c.env.DB.prepare(
+    "SELECT o.*, GROUP_CONCAT(oi.product_name || ' x ' || oi.quantity, ', ') AS items FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id GROUP BY o.id ORDER BY o.created_at DESC LIMIT 100"
+  ).all()
+  return c.json({ success: true, data: results })
+})
+
+app.patch('/api/admin/orders/:id/status', async (c) => {
+  const identity = await requireAdmin(c.req.raw, c.env)
+  if (!identity) return c.json({ success: false, error: 'Bạn cần đăng nhập bằng tài khoản quản trị.' }, 401)
+  const orderId = c.req.param('id')
+  const body = await c.req.json<{ status?: string }>().catch(() => null)
+  const status = body?.status
+  if (!['pending', 'confirmed', 'shipping', 'completed', 'cancelled'].includes(status ?? '')) {
+    return c.json({ success: false, error: 'Trạng thái đơn hàng không hợp lệ.' }, 400)
+  }
+  const existing = await c.env.DB.prepare('SELECT status FROM orders WHERE id = ?').bind(orderId).first<{ status: string }>()
+  if (!existing) return c.json({ success: false, error: 'Không tìm thấy đơn hàng.' }, 404)
+  if (existing.status === 'cancelled' && status !== 'cancelled') {
+    return c.json({ success: false, error: 'Đơn đã hủy không thể mở lại.' }, 409)
+  }
+  const statements: D1PreparedStatement[] = [c.env.DB.prepare('UPDATE orders SET status = ? WHERE id = ?').bind(status, orderId)]
+  if (status === 'cancelled' && existing.status !== 'cancelled') {
+    const { results: items } = await c.env.DB.prepare(
+      'SELECT id, product_id, quantity FROM order_items WHERE order_id = ? AND stock_returned = 0'
+    ).bind(orderId).all<{ id: number; product_id: number; quantity: number }>()
+    for (const item of items) {
+      statements.push(c.env.DB.prepare(
+        'UPDATE products SET stock = stock + ? WHERE id = ? AND EXISTS (SELECT 1 FROM order_items WHERE id = ? AND stock_returned = 0)'
+      ).bind(item.quantity, item.product_id, item.id))
+      statements.push(c.env.DB.prepare('UPDATE order_items SET stock_returned = 1 WHERE id = ? AND stock_returned = 0').bind(item.id))
+    }
+  }
+  await c.env.DB.batch(statements)
+  return c.json({ success: true, data: { id: orderId, status } })
 })
 
 app.post('/api/products', async (c) => {

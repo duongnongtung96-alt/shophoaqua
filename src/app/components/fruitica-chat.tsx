@@ -42,6 +42,13 @@ export default function FruiticaChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: question, history }),
       })
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('application/json')) {
+        if (response.status === 404) {
+          throw new Error('Chatbot API chưa được cập nhật trên Cloudflare Worker. Đang chờ triển khai phiên bản mới.')
+        }
+        throw new Error(`Chatbot API trả về HTTP ${response.status}. Vui lòng thử lại sau.`)
+      }
       const result = await response.json() as { success: boolean; data?: { answer: string }; error?: string }
       if (!response.ok || !result.success || !result.data?.answer) {
         throw new Error(result.error || 'Trợ lý chưa trả lời được, vui lòng thử lại.')
