@@ -16,7 +16,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/products')
+    fetch('[https://shophoaqua.duongnongtung96.workers.dev/api/products](https://shophoaqua.duongnongtung96.workers.dev/api/products)')
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setProducts(res.data)
