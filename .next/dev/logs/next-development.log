@@ -1,0 +1,18 @@
+{"timestamp":"00:00:01.064","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:01.065","source":"Server","level":"LOG","message":"✓ Generated AGENTS.md and CLAUDE.md for AI agents. Set `agentRules: false` in next.config to disable."}
+{"timestamp":"00:00:35.035","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:00:41.343","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:01:06.719","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:01:08.709","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:01:17.667","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:01:20.286","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:09:57.593","source":"Server","level":"ERROR","message":"⨯ ./src/app/layout.tsx:2:1\nError: Module not found: Can't resolve './globals.css'\n  1 | import type { Metadata } from 'next'\n> 2 | import './globals.css'\n    | ^^^^^^^^^^^^^^^^^^^^^^\n  3 |\n  4 | export const metadata: Metadata = {\n  5 |   title: 'Fruitica | Hoa quả tươi ngon',\n\n\n\nhttps://nextjs.org/docs/messages/module-not-found\n\n"}
+{"timestamp":"00:09:57.596","source":"Server","level":"ERROR","message":"⨯ ./src/app/layout.tsx:2:1\nError: Module not found: Can't resolve './globals.css'\n  1 | import type { Metadata } from 'next'\n> 2 | import './globals.css'\n    | ^^^^^^^^^^^^^^^^^^^^^^\n  3 |\n  4 | export const metadata: Metadata = {\n  5 |   title: 'Fruitica | Hoa quả tươi ngon',\n\n\n\nhttps://nextjs.org/docs/messages/module-not-found\n\n"}
+{"timestamp":"00:13:15.591","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:13:16.774","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:13:17.350","source":"Browser","level":"INFO","message":"Download the React DevTools for a better development experience: https://react.dev/link/react-devtools"}
+{"timestamp":"00:13:19.373","source":"Browser","level":"WARN","message":"Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior=\"smooth\"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior"}
+{"timestamp":"00:13:19.434","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mDetected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior=\\\"smooth\\\"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior\\u001b[39m\""}
+{"timestamp":"00:15:23.695","source":"Server","level":"LOG","message":"✓ Compiled in 43ms"}
+{"timestamp":"00:17:03.268","source":"Server","level":"LOG","message":"✓ Compiled in 46ms"}
+{"timestamp":"00:17:14.547","source":"Server","level":"LOG","message":"✓ Compiled in 13ms"}
