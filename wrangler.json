@@ -1,0 +1,18 @@
+{
+  "name": "shophoaqua",
+  "main": "src/server/index.ts",
+  "compatibility_date": "2026-10-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "shophoaqua-db",
+      "database_id": "PASTE_DATABASE_ID_CUA_BAN_VAO_DAY"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "shophoaqua-bucket"
+    }
+  ]
+}
