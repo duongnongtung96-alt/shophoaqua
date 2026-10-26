@@ -1,0 +1,5 @@
+streamlit
+python-dotenv
+pandas
+boto3
+pyiceberg[pyarrow]

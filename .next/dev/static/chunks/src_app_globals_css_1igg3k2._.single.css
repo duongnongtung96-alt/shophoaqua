@@ -1259,6 +1259,7 @@ img {
 
 .admin-tabs {
   border-bottom: 1px solid #dfe6dc;
+  flex-wrap: wrap;
   gap: 22px;
   margin: -7px 0 25px;
   display: flex;
@@ -1764,6 +1765,19 @@ img {
   height: 6px;
 }
 
+.chat-hotline {
+  color: #d4ebca;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.chat-hotline:hover, .chat-disclaimer a {
+  text-decoration: underline;
+}
+
 .chat-close {
   color: #fff;
   cursor: pointer;
@@ -1836,6 +1850,56 @@ img {
   background: var(--green-100);
 }
 
+.chat-contact-form {
+  background: #fff;
+  border: 1px solid #dce7d8;
+  gap: 7px;
+  max-width: 100%;
+  padding: 11px;
+  display: grid;
+}
+
+.chat-contact-form label {
+  color: var(--green-950);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.chat-contact-form > div {
+  gap: 6px;
+  display: flex;
+}
+
+.chat-contact-form input {
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  border: 1px solid #d9e2d8;
+  padding: 8px;
+  font-size: 12px;
+}
+
+.chat-contact-form button {
+  color: #fff;
+  background: var(--green-700);
+  cursor: pointer;
+  border: 0;
+  padding: 0 11px;
+  font-size: 12px;
+}
+
+.chat-contact-form button:disabled {
+  cursor: default;
+  opacity: .6;
+}
+
+.chat-contact-form p {
+  color: var(--green-800);
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 .chat-form {
   background: #fff;
   border: 1px solid #d9e2d8;
@@ -1878,6 +1942,18 @@ img {
   margin: 0;
   padding: 3px 12px 9px;
   font-size: 10px;
+}
+
+.chat-disclaimer a {
+  color: var(--green-700);
+  font-weight: 700;
+}
+
+.consultation-phone {
+  color: var(--green-700);
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 @keyframes rise-in {

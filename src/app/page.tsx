@@ -57,21 +57,30 @@ export default function HomePage() {
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(AUTH_STORAGE_KEY)
-      if (stored) setSession(JSON.parse(stored) as AuthSession)
-    } catch {
-      window.localStorage.removeItem(AUTH_STORAGE_KEY)
-    }
-    try {
-      const savedCart = window.localStorage.getItem('fruitica-cart-v1')
-      if (savedCart) {
-        const parsed: unknown = JSON.parse(savedCart)
-        if (Array.isArray(parsed)) {
-          setCart(parsed.filter((line): line is CartLine => Number.isSafeInteger(line?.product_id) && Number.isSafeInteger(line?.quantity) && line.quantity > 0))
+      if (stored) {
+        const parsed = JSON.parse(stored) as AuthSession
+        if (parsed.token && Number.isSafeInteger(parsed.user?.id)) {
+          setSession(parsed)
+          const cartKey = `fruitica-cart-v1-${parsed.user.id}`
+          try {
+            const savedCart = window.localStorage.getItem(cartKey)
+            if (savedCart) {
+              const parsedCart: unknown = JSON.parse(savedCart)
+              if (Array.isArray(parsedCart)) {
+                setCart(parsedCart.filter((line): line is CartLine => Number.isSafeInteger(line?.product_id) && Number.isSafeInteger(line?.quantity) && line.quantity > 0 && line.quantity <= 99))
+              }
+            }
+          } catch {
+            window.localStorage.removeItem(cartKey)
+          }
+        } else {
+          window.localStorage.removeItem(AUTH_STORAGE_KEY)
         }
       }
     } catch {
-      window.localStorage.removeItem('fruitica-cart-v1')
+      window.localStorage.removeItem(AUTH_STORAGE_KEY)
     } finally {
+      window.localStorage.removeItem('fruitica-cart-v1')
       setCartReady(true)
     }
 
@@ -89,8 +98,10 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
-    if (cartReady) window.localStorage.setItem('fruitica-cart-v1', JSON.stringify(cart))
-  }, [cart, cartReady])
+    if (cartReady && session) {
+      window.localStorage.setItem(`fruitica-cart-v1-${session.user.id}`, JSON.stringify(cart))
+    }
+  }, [cart, cartReady, session])
 
   useEffect(() => {
     if (!loading) {
@@ -107,11 +118,15 @@ export default function HomePage() {
   const cartTotal = cartItems.reduce((total, line) => total + line.product.price * line.quantity, 0)
 
   function addToCart(product: Product) {
+    if (!session) {
+      window.location.assign('/login')
+      return
+    }
     if (product.stock < 1) return
     setCart((current) => {
       const existing = current.find((line) => line.product_id === product.id)
       if (existing) {
-        if (existing.quantity >= product.stock) return current
+        if (existing.quantity >= Math.min(product.stock, 99)) return current
         return current.map((line) => line.product_id === product.id ? { ...line, quantity: line.quantity + 1 } : line)
       }
       return [...current, { product_id: product.id, quantity: 1 }]
@@ -122,19 +137,26 @@ export default function HomePage() {
   function adjustQuantity(product: Product, delta: number) {
     setCart((current) => current.flatMap((line) => {
       if (line.product_id !== product.id) return [line]
-      const quantity = Math.min(product.stock, line.quantity + delta)
+      const quantity = Math.min(product.stock, 99, line.quantity + delta)
       return quantity > 0 ? [{ ...line, quantity }] : []
     }))
   }
 
   async function placeOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (!session) {
+      window.location.assign('/login')
+      return
+    }
     setSubmittingOrder(true)
     setOrderError('')
     try {
       const response = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.token}`,
+        },
         body: JSON.stringify({
           customer_name: orderName,
           phone: orderPhone,
@@ -164,6 +186,9 @@ export default function HomePage() {
   function logout() {
     window.localStorage.removeItem(AUTH_STORAGE_KEY)
     setSession(null)
+    setCart([])
+    setCartOpen(false)
+    setCheckingOut(false)
   }
 
   return (
@@ -173,7 +198,14 @@ export default function HomePage() {
           <Link href="/" className="brand" aria-label="Fruitica - Trang chủ"><span className="brand-mark">F</span><span>Fruitica</span></Link>
           <nav className="main-nav" aria-label="Điều hướng chính"><a href="#home">Trang chủ</a><a href="#about">Về Fruitica</a><a href="#products">Sản phẩm</a><a href="#reviews">Đánh giá</a></nav>
           <div className="nav-actions">
-            <button className="cart-button" type="button" onClick={() => { setCartOpen(true); setOrderPlacedId('') }} aria-label={`Giỏ hàng, ${cartCount} sản phẩm`}>Giỏ hàng <span className="cart-count">{cartCount}</span></button>
+            <button className="cart-button" type="button" onClick={() => {
+              if (!session) {
+                window.location.assign('/login')
+                return
+              }
+              setCartOpen(true)
+              setOrderPlacedId('')
+            }} aria-label={session ? `Giỏ hàng, ${cartCount} sản phẩm` : 'Đăng nhập để xem giỏ hàng'}>Giỏ hàng <span className="cart-count">{session ? cartCount : 0}</span></button>
             {session ? <div className="account-actions"><span className="account-name">Chào, {session.user.full_name}</span>{session.user.role === 'admin' && <Link className="button button-outline button-small" href="/admin">Trang Admin</Link>}<button className="text-button" type="button" onClick={logout}>Đăng xuất</button></div> : <Link className="button button-green button-small" href="/login">Đăng nhập</Link>}
           </div>
         </div>

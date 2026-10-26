@@ -27,6 +27,7 @@ CREATE INDEX IF NOT EXISTS idx_products_created_at ON products (created_at DESC,
 
 CREATE TABLE IF NOT EXISTS orders (
   id TEXT PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
   customer_name TEXT NOT NULL,
   phone TEXT NOT NULL,
   delivery_address TEXT NOT NULL,
@@ -47,7 +48,17 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders (user_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items (order_id);
+
+CREATE TABLE IF NOT EXISTS chat_consultations (
+  id TEXT PRIMARY KEY,
+  phone TEXT NOT NULL,
+  question TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_consultations_created_at ON chat_consultations (created_at DESC);
 
 INSERT OR IGNORE INTO users (email, password, full_name, role) VALUES
 ('admin@fruitica.vn', 'pbkdf2$100000$PbFwu4ZxD17L-nw87fUH9Q$Fzs2WxGvSLbhZUKtkAbZ43nNrIHjyjSwlKuni2LuaO0', 'Quản Trị Viên', 'admin');

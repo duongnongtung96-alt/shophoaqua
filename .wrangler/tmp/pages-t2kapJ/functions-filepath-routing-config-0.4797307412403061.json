@@ -1,0 +1,21 @@
+{
+  "routes": [
+    {
+      "routePath": "/api/stats",
+      "mountPath": "/api",
+      "method": "GET",
+      "module": [
+        "api/stats.js:onRequestGet"
+      ]
+    },
+    {
+      "routePath": "/api/track",
+      "mountPath": "/api",
+      "method": "POST",
+      "module": [
+        "api/track.js:onRequestPost"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Fruitica • Thống kê Basin</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#e8f6ef;background:#091b14}
+*{box-sizing:border-box}body{margin:0}.container{max-width:1120px;margin:auto;padding:30px 18px 60px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header span{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#93d9b4}h1{margin:7px 0 0;font-size:clamp(24px,4vw,36px)}
+button{border:0;border-radius:10px;background:#8de9ae;color:#092116;font-weight:700;padding:12px 16px;cursor:pointer}
+input{border:1px solid #355748;background:#132b20;color:#fff;border-radius:10px;padding:12px;min-width:245px;outline:none}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 8px}small,.sub{color:#9bb5a5}
+#error{color:#ffacac;margin:12px 0}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:20px 0}
+article{border:1px solid #2b4738;border-radius:16px;background:#10271c;padding:18px}article strong{display:block;font-size:31px;margin-top:12px}
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+h2{margin:0 0 20px;font-size:18px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0}
+.bar{height:9px;background:#244634;border-radius:20px;margin:5px 0 13px;overflow:hidden}.bar>div{height:100%;border-radius:20px;background:#78dfa4}
+.chart{min-height:200px;display:flex;align-items:flex-end;gap:12px;padding:20px 5px 4px}
+.chart>div{flex:1;min-width:0;text-align:center}.chart .column{margin:auto;width:64%;min-height:2px;border-radius:8px 8px 0 0;background:linear-gradient(#8bf5b3,#25864f)}
+.chart label{display:block;color:#9bb5a5;font-size:11px;margin-top:8px}.chart em{font-style:normal;font-size:12px;color:#e8f6ef}
+footer{padding-top:26px;font-size:12px;color:#9bb5a5}
+</style>
+</head>
+<body><div class="container">
+<header><div><span>FRUITICA / BASIN ANALYTICS</span><h1>Thống kê lượt truy cập</h1></div><a style="color:#8de9ae" href="/">← Trở về cửa hàng</a></header>
+<p class="sub">Bảng điều khiển riêng tư · Dữ liệu được ghi khi khách thực sự mở trang · Ngày tính theo giờ Việt Nam</p>
+<div class="controls"><input id="key" type="password" placeholder="Nhập STATS_ADMIN_KEY" autocomplete="off"><button id="load">Xem thống kê</button></div>
+<div id="error" role="alert"></div><small id="updated"></small>
+<div class="metrics" id="metrics">
+<article>Lượt xem (tất cả)<strong>—</strong></article><article>Khách riêng biệt (ước tính)<strong>—</strong></article>
+<article>Lượt xem hôm nay<strong>—</strong></article><article>7 ngày gần nhất<strong>—</strong></article>
+</div>
+<div class="panels">
+<article><h2>Biểu đồ 7 ngày</h2><div class="chart" id="daily"></div></article>
+<article><h2>Thiết bị (7 ngày)</h2><div id="device"></div></article>
+<article><h2>Quốc gia (7 ngày)</h2><div id="country"></div></article>
+<article><h2>Trang được xem nhiều (7 ngày)</h2><div id="page"></div></article>
+</div>
+<footer>Đếm trên dữ liệu đã ghi nhận, có thể có độ trễ của Basin Pipelines. Không có IP cá nhân trong bảng thống kê.</footer>
+</div><script>
+const $=id=>document.getElementById(id);const num=v=>Number(v||0).toLocaleString('vi-VN');
+function renderBars(id,rows,name){const root=$(id);root.replaceChildren();const max=Math.max(1,...rows.map(x=>Number(x.views||0)));if(!rows.length){root.textContent='Chưa có dữ liệu';return;}
+for(const r of rows){const row=document.createElement('div');row.className='row';const label=document.createElement('span');label.textContent=String(r[name]??'Không rõ');const count=document.createElement('b');count.textContent=num(r.views);row.append(label,count);
+const bar=document.createElement('div');bar.className='bar';const inner=document.createElement('div');inner.style.width=(Number(r.views||0)/max*100)+'%';bar.append(inner);root.append(row,bar);}}
+function renderDaily(rows){const root=$('daily');root.replaceChildren();const map=new Map(rows.map(r=>[String(r.day).slice(0,10),Number(r.views||0)]));const days=[];
+const vnDay=Math.floor((Date.now()+7*3600000)/86400000);for(let i=6;i>=0;i--){const iso=new Date((vnDay-i)*86400000).toISOString().slice(0,10);days.push({day:iso,views:map.get(iso)||0});}
+const max=Math.max(1,...days.map(x=>x.views));for(const r of days){const el=document.createElement('div');const value=document.createElement('em');value.textContent=num(r.views);const col=document.createElement('div');col.className='column';col.style.height=(Math.max(2,r.views/max*140))+'px';const label=document.createElement('label');label.textContent=r.day.slice(5);el.append(value,col,label);root.append(el);}}
+$('load').addEventListener('click',async()=>{$('error').textContent='';$('updated').textContent='Đang lấy dữ liệu…';const key=$('key').value.trim();if(!key){$('error').textContent='Hãy nhập khóa quản trị.';return;}
+try{const res=await fetch('/api/stats',{headers:{Authorization:'Bearer '+key},cache:'no-store'});const data=await res.json();if(!res.ok)throw Error(data.error||'Lỗi máy chủ');const m=data.overview||{};
+const labels=['Lượt xem (tất cả)','Khách riêng biệt (ước tính)','Lượt xem hôm nay','7 ngày gần nhất'];const values=[m.total_views,m.unique_visitors,m.views_today,m.views_7days];
+$('metrics').replaceChildren();labels.forEach((text,i)=>{const a=document.createElement('article');a.append(document.createTextNode(text));const strong=document.createElement('strong');strong.textContent=num(values[i]);a.append(strong);$('metrics').append(a);});
+renderDaily(data.daily||[]);renderBars('device',data.device||[],'device');renderBars('country',data.country||[],'country');renderBars('page',data.page||[],'path');
+$('updated').textContent='Cập nhật: '+new Date(data.generatedAt).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'});
+}catch(e){$('updated').textContent='';$('error').textContent=e.message;}});
+</script></body></html>

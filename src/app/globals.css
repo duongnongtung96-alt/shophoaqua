@@ -204,7 +204,7 @@ img { display: block; max-width: 100%; }
 .stock-edit input { width: 72px; min-height: 30px; padding: 4px 7px; border: 1px solid #d6ded5; color: var(--ink); background: white; }
 .stock-edit button { padding: 4px 8px; border: 0; color: white; background: var(--green-700); cursor: pointer; font-size: 11px; }
 .inventory-empty, .admin-loading { padding: 40px 24px; color: var(--muted); text-align: center; }
-.admin-tabs { margin: -7px 0 25px; display: flex; gap: 22px; border-bottom: 1px solid #dfe6dc; }
+.admin-tabs { margin: -7px 0 25px; display: flex; flex-wrap: wrap; gap: 22px; border-bottom: 1px solid #dfe6dc; }
 .admin-tabs button { padding: 12px 2px; display: flex; align-items: center; gap: 8px; border: 0; border-bottom: 2px solid transparent; color: var(--muted); background: transparent; cursor: pointer; font-size: 13px; }
 .admin-tabs button.active { border-bottom-color: var(--green-700); color: var(--green-950); font-weight: 700; }
 .admin-tabs button span { min-width: 20px; padding: 2px 5px; color: var(--green-800); background: var(--green-100); font-size: 10px; text-align: center; }
@@ -276,6 +276,8 @@ img { display: block; max-width: 100%; }
 .chat-header strong { font-size: 14px; }
 .chat-header small { margin-top: 4px; display: flex; align-items: center; gap: 6px; color: #c9dccd; font-size: 11px; }
 .chat-header small span { width: 6px; height: 6px; border-radius: 50%; background: #89d69b; }
+.chat-hotline { margin-top: 4px; display: inline-block; color: #d4ebca; font-size: 11px; font-weight: 700; text-decoration: none; }
+.chat-hotline:hover, .chat-disclaimer a { text-decoration: underline; }
 .chat-close { width: 32px; height: 32px; margin-left: auto; border: 0; color: white; background: transparent; cursor: pointer; font-size: 23px; }
 .chat-messages { padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; background: #f7f8f2; }
 .chat-message { max-width: 88%; margin: 0; padding: 10px 12px; border-radius: 12px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -285,11 +287,20 @@ img { display: block; max-width: 100%; }
 .chat-suggestions { margin-top: 3px; display: flex; flex-wrap: wrap; gap: 6px; }
 .chat-suggestions button { padding: 7px 9px; border: 1px solid #cbdccf; border-radius: 15px; color: var(--green-800); background: transparent; cursor: pointer; font-size: 11px; }
 .chat-suggestions button:hover { background: var(--green-100); }
+.chat-contact-form { max-width: 100%; padding: 11px; display: grid; gap: 7px; border: 1px solid #dce7d8; background: white; }
+.chat-contact-form label { color: var(--green-950); font-size: 11px; font-weight: 700; }
+.chat-contact-form > div { display: flex; gap: 6px; }
+.chat-contact-form input { width: 100%; min-width: 0; padding: 8px; border: 1px solid #d9e2d8; font: inherit; font-size: 12px; }
+.chat-contact-form button { padding: 0 11px; border: 0; color: white; background: var(--green-700); cursor: pointer; font-size: 12px; }
+.chat-contact-form button:disabled { cursor: default; opacity: .6; }
+.chat-contact-form p { margin: 0; color: var(--green-800); font-size: 11px; line-height: 1.5; }
 .chat-form { margin: 10px 12px 4px; padding: 5px 5px 5px 11px; display: flex; align-items: center; gap: 8px; border: 1px solid #d9e2d8; background: white; }
 .chat-form input { width: 100%; min-width: 0; height: 36px; border: 0; outline: none; color: var(--ink); font-size: 13px; }
 .chat-form button { width: 34px; height: 34px; flex: 0 0 auto; border: 0; color: white; background: var(--green-700); cursor: pointer; font-size: 19px; }
 .chat-form button:disabled { cursor: default; opacity: .45; }
 .chat-disclaimer { margin: 0; padding: 3px 12px 9px; color: #859187; text-align: center; font-size: 10px; }
+.chat-disclaimer a { color: var(--green-700); font-weight: 700; }
+.consultation-phone { color: var(--green-700); font-size: 13px; font-weight: 700; white-space: nowrap; }
 
 @keyframes rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 960px) {

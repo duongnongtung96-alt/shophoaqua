@@ -23,9 +23,11 @@
   "homepage": "https://github.com/duongnongtung96-alt/shophoaqua#readme",
   "dependencies": {
     "@cloudflare/next-on-pages": "^1.13.16",
+    "chart.js": "^4.6.1",
     "hono": "^4.13.13",
     "next": "^16.3.8",
     "react": "^19.3.0",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.3.0"
   },
   "devDependencies": {

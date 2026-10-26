@@ -1,21 +1,32 @@
 {
-  "name": "shophoaqua",
-  "main": "src/server/index.ts",
-  "compatibility_date": "2026-10-01",
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "shophoaqua-db",
-      "database_id": "0b5dc6e2-2e78-42bd-8d0f-74b9d6f06557"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "BUCKET",
-      "bucket_name": "shophoaqua-bucket"
-    }
-  ],
-  "ai": {
-    "binding": "AI"
-  }
+	"name": "shophoaqua",
+	"main": "src/server/index.ts",
+	"compatibility_date": "2026-10-01",
+	"vars": {
+		"BASIN_INGEST_URL": "https://f8fb6f6f730b404fb2f273fd789d04df.ingest.cloudflare.com",
+		"BASIN_TEST_MODE": "false"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "shophoaqua-db",
+			"database_id": "0b5dc6e2-2e78-42bd-8d0f-74b9d6f06557"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "BUCKET",
+			"bucket_name": "shophoaqua-bucket"
+		}
+	],
+	"ai": {
+		"binding": "AI"
+	},
+	"vectorize": [
+		{
+			"binding": "VECTORIZE",
+			"index_name": "shophoaqua-index",
+			"remote": true
+		}
+	]
 }

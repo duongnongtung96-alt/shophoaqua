@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Be_Vietnam_Pro, Noto_Serif } from 'next/font/google'
 import './globals.css'
+import Script from 'next/script'
+
 
 const vietnameseFont = Be_Vietnam_Pro({
   subsets: ['latin', 'vietnamese'],
@@ -25,7 +27,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi" className={`${vietnameseFont.variable} ${displayFont.variable}`}>
-      <body>{children}</body>
+      <body>{children}
+  <Script
+    src="/fruitica-analytics.js"
+    strategy="afterInteractive"
+  /></body>
     </html>
   )
 }
