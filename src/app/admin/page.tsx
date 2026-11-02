@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useEffect, useState } from 'react'
+import AnalyticsPanel from './analytics-panel'
 import { AUTH_STORAGE_KEY, AuthSession } from '../lib/auth'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://shophoaqua.duongnongtung96.workers.dev'
@@ -48,7 +49,7 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [consultations, setConsultations] = useState<ChatConsultation[]>([])
 
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'consultations'>('products')
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'consultations' | 'analytics'>('products')
   const [editingId, setEditingId] = useState<number | null>(null)
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
@@ -319,6 +320,9 @@ export default function AdminPage() {
             <button className={activeTab === 'consultations' ? 'active' : ''} type="button" onClick={() => setActiveTab('consultations')}>
               Tư vấn chatbot <span>{consultations.length}</span>
             </button>
+            <button className={activeTab === 'analytics' ? 'active' : ''} type="button" onClick={() => setActiveTab('analytics')}>
+              Thống kê truy cập
+            </button>
           </nav>
         )}
 
@@ -365,14 +369,14 @@ export default function AdminPage() {
               <div className="orders-list">{orders.map((order) => <article className="order-row" key={order.id}><div className="order-main"><div><strong>#{order.id.slice(0, 8).toUpperCase()} · {order.customer_name}</strong><small>{new Date(`${order.created_at.replace(' ', 'T')}Z`).toLocaleString('vi-VN')}</small></div><strong>{order.total.toLocaleString('vi-VN')} đ</strong></div><p>{order.items || 'Không có dòng hàng'}</p><div className="order-contact"><span>{order.phone}</span><span>{order.delivery_address}</span></div>{order.note && <small className="order-note">Ghi chú: {order.note}</small>}<label className="order-status">Trạng thái<select value={order.status} disabled={order.status === 'cancelled'} onChange={(event) => void updateOrderStatus(order, event.target.value as Order['status'])}><option value="pending">Chờ xác nhận</option><option value="confirmed">Đã xác nhận</option><option value="shipping">Đang giao</option><option value="completed">Hoàn tất</option><option value="cancelled">Đã hủy</option></select></label></article>)}</div>
             ) : <p className="inventory-empty">Chưa có đơn hàng.</p>}
           </section>
-        ) : (
+        ) : activeTab === 'consultations' ? (
           <section className="orders-panel">
             <div className="inventory-heading"><div><span className="kicker">Trợ lý Fruitica</span><h2>Khách để lại thông tin tư vấn <span>{consultations.length}</span></h2></div><button className="refresh-button" type="button" onClick={() => void loadConsultations()}>Làm mới</button></div>
             {consultations.length ? (
               <div className="orders-list">{consultations.map((consultation) => <article className="order-row" key={consultation.id}><div className="order-main"><div><strong>Yêu cầu tư vấn</strong><small>{new Date(`${consultation.created_at.replace(' ', 'T')}Z`).toLocaleString('vi-VN')}</small></div><a className="consultation-phone" href={`tel:${consultation.phone}`}>{consultation.phone}</a></div><p>{consultation.question}</p></article>)}</div>
             ) : <p className="inventory-empty">Chưa có yêu cầu tư vấn mới.</p>}
           </section>
-        )}
+        ) : <AnalyticsPanel token={session.token} />}
       </div>
     </main>
   )

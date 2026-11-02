@@ -326,49 +326,91 @@ app.post('/api/track', async (c) => {
    BẢNG THỐNG KÊ BUSINESS INTELLIGENCE (BI)
 ========================================== */
 app.get('/api/admin/stats', async (c) => {
+  const identity = await requireAdmin(c.req.raw, c.env)
+  if (!identity) return c.json({ success: false, error: 'Bạn cần đăng nhập bằng tài khoản quản trị.' }, 401)
+
+  const days = Number(c.req.query('days') ?? '1')
+  if (![1, 7, 30].includes(days)) {
+    return c.json({ success: false, error: 'Khoảng thời gian không hợp lệ.' }, 400)
+  }
+
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000
+  const groupId = '06'
+  const pageViews = "group_id = ? AND event IN ('pageview', 'page_view') AND created_at >= ?"
+
   try {
-    const time24hAgo = Date.now() - 24 * 60 * 60 * 1000
-
-    // 1. Tổng số lượt xem & Số visitor (IP/visitor_id duy nhất) trong 24h
-    const overview = await c.env.DB.prepare(`
-      SELECT 
-        COUNT(*) as total_views,
-        COUNT(DISTINCT visitor_id) as unique_visitors,
-        COUNT(DISTINCT country) as total_countries
-      FROM analytics_events 
-      WHERE group_id = '06' AND created_at >= ?
-    `).bind(time24hAgo).first<{ total_views: number; unique_visitors: number; total_countries: number }>()
-
-    // 2. Thống kê theo Quốc gia (24h)
-    const { results: countries } = await c.env.DB.prepare(`
-      SELECT country, COUNT(*) as count 
-      FROM analytics_events 
-      WHERE group_id = '06' AND created_at >= ?
-      GROUP BY country
-      ORDER BY count ASC
-    `).bind(time24hAgo).all<{ country: string; count: number }>()
-
-    // 3. Thống kê theo Thiết bị (24h)
-    const { results: devices } = await c.env.DB.prepare(`
-      SELECT device, COUNT(*) as count 
-      FROM analytics_events 
-      WHERE group_id = '06' AND created_at >= ?
-      GROUP BY device
-      ORDER BY count ASC
-    `).bind(time24hAgo).all<{ device: string; count: number }>()
+    const bucket = days === 1 ? '%Y-%m-%d %H:00' : '%Y-%m-%d'
+    const [overview, timeline, countries, devices, pages, recent] = await Promise.all([
+      c.env.DB.prepare(`
+        SELECT COUNT(*) AS total_views,
+          COUNT(DISTINCT NULLIF(visitor_id, '')) AS unique_visitors,
+          COUNT(DISTINCT CASE WHEN country NOT IN ('', 'ZZ') THEN country END) AS total_countries,
+          COUNT(DISTINCT NULLIF(path, '')) AS total_pages
+        FROM analytics_events WHERE ${pageViews}
+      `).bind(groupId, cutoff).first<{
+        total_views: number
+        unique_visitors: number
+        total_countries: number
+        total_pages: number
+      }>(),
+      c.env.DB.prepare(`
+        SELECT strftime('${bucket}', created_at / 1000, 'unixepoch', '+7 hours') AS label,
+          COUNT(*) AS views
+        FROM analytics_events WHERE ${pageViews}
+        GROUP BY label ORDER BY label
+      `).bind(groupId, cutoff).all<{ label: string; views: number }>(),
+      c.env.DB.prepare(`
+        SELECT COALESCE(NULLIF(country, ''), 'ZZ') AS country, COUNT(*) AS views
+        FROM analytics_events WHERE ${pageViews}
+        GROUP BY country ORDER BY views DESC LIMIT 10
+      `).bind(groupId, cutoff).all<{ country: string; views: number }>(),
+      c.env.DB.prepare(`
+        SELECT COALESCE(NULLIF(device, ''), 'unknown') AS device, COUNT(*) AS views
+        FROM analytics_events WHERE ${pageViews}
+        GROUP BY device ORDER BY views DESC LIMIT 10
+      `).bind(groupId, cutoff).all<{ device: string; views: number }>(),
+      c.env.DB.prepare(`
+        SELECT COALESCE(NULLIF(path, ''), '/') AS path, COUNT(*) AS views
+        FROM analytics_events WHERE ${pageViews}
+        GROUP BY path ORDER BY views DESC LIMIT 10
+      `).bind(groupId, cutoff).all<{ path: string; views: number }>(),
+      c.env.DB.prepare(`
+        SELECT created_at, path, country, device
+        FROM analytics_events WHERE ${pageViews}
+        ORDER BY created_at DESC LIMIT 100
+      `).bind(groupId, cutoff).all<{
+        created_at: number
+        path: string
+        country: string
+        device: string
+      }>(),
+    ])
 
     return c.json({
       success: true,
       data: {
-        unique_visitors: overview?.unique_visitors || 0,
-        total_countries: overview?.total_countries || 0,
-        total_views: overview?.total_views || 0,
-        countries: countries || [],
-        devices: devices || []
+        source: 'D1',
+        days,
+        generated_at: Date.now(),
+        overview: {
+          total_views: overview?.total_views ?? 0,
+          unique_visitors: overview?.unique_visitors ?? 0,
+          total_countries: overview?.total_countries ?? 0,
+          total_pages: overview?.total_pages ?? 0,
+        },
+        timeline: timeline.results ?? [],
+        countries: countries.results ?? [],
+        devices: devices.results ?? [],
+        pages: pages.results ?? [],
+        recent: recent.results ?? [],
       }
     })
-  } catch (err) {
-    return c.json({ success: false, error: 'Không thể truy vấn dữ liệu thống kê.' }, 500)
+  } catch (error) {
+    console.error('Admin analytics query failed:', error)
+    return c.json({
+      success: false,
+      error: 'Không thể tải thống kê. Hãy xác nhận migration analytics_events đã được áp dụng.',
+    }, 500)
   }
 })
 
